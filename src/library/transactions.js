@@ -30,4 +30,20 @@ async function addTransaction(formData, url) {
     return response;
 }
 
-export {getCurrentList, addTransaction}
+
+function findBucketOwner(clientID, outBuckets, updateReturningBucket){
+    let foundBucket = null;
+    outBuckets.forEach((item) => {
+        if(item.bucket_owner === clientID){
+            foundBucket = item;
+        }
+    })
+    if(foundBucket !== null){
+        updateReturningBucket(foundBucket);
+    }
+
+}
+
+export {getCurrentList, addTransaction, findBucketOwner}
+
+

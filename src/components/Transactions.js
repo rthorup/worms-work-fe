@@ -1,5 +1,5 @@
 import {useState, useEffect, useContext} from 'react'
-import { Typeahead } from 'react-bootstrap-typeahead'
+import { Input, Typeahead } from 'react-bootstrap-typeahead'
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import moment from 'moment';
@@ -7,7 +7,7 @@ import moment from 'moment';
 import { UrlContext } from '../context/urlContext';
 
 import 'react-bootstrap-typeahead/css/Typeahead.css';
-import { getCurrentList, addTransaction} from '../library/transactions';
+import { getCurrentList, addTransaction, findBucketOwner} from '../library/transactions';
 
 
 
@@ -17,8 +17,10 @@ function Transactions() {
 
     const [clientList, updateClientList] = useState([]);
     const [bucketList, updateBucketList] = useState([]);
+    const [outBuckets, updateOutBuckets] = useState([]);
     const [selectedClient, setSelectedClient] = useState([]);
-    const [returningBucket, setReturningBucket] = useState([]);
+    const [returningBucket, setReturningBucket] = useState(null);
+    const [weight, setBucketWeight] = useState(null)
     const [newBucket, setNewBucket] = useState([]);
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -27,13 +29,18 @@ function Transactions() {
 
     async function startSubmit() {
         setError(false)
-        if((!selectedClient.length || !returningBucket.length || !newBucket.length)) {
+
+        if((!selectedClient.length || !returningBucket.bucket_id || !newBucket.length || weight === null || !weight.length)) {
             setErrorMessage("Please fill out all of the categories to continue")
+            setError(true)
+        }
+        if(typeof(parseInt(weight)) !== 'number'){
+            setErrorMessage("Robert, that's not a number. Try again.")
             setError(true)
         }
         else {
 
-            if (returningBucket[0].id === newBucket[0].id) {
+            if (returningBucket.bucket_id === newBucket[0].id) {
                 console.log("same buckets dummy")
                 setErrorMessage("Robert, those are the same damn buckets dummy");
                 setError(true)
@@ -41,7 +48,7 @@ function Transactions() {
             else {
                 const date = moment().format('YYYY-MM-DD HH:mm:ss')
                 const selectedId = selectedClient[0].id;
-                const returningId = returningBucket[0].id;
+                const returningId = returningBucket.bucket_id;
                 const newBucketId = newBucket[0].id;
                 const result = await addTransaction({selectedId, returningId, newBucketId, date}, url)
                 if(result.rowCount === 1) {
@@ -52,24 +59,29 @@ function Transactions() {
         }
     }
 
+
+
     useEffect (() => {
         try{
             getCurrentList(url)
             .then((res) => {
                 const newClientFormat = [];
                 const newBucketFormat = [];
-                const {bucketResults, clientResults} = res;
+                const {availableBuckets, clientResults, outBuckets} = res;
+                console.log(outBuckets);
+                
                 clientResults.forEach((client) => {
                   const newFormat = {id: client.client_id, label: `${client.first_name} ${client.last_name}`}
                   newClientFormat.push(newFormat)
                 })
 
-                bucketResults.forEach((bucket) => {
+                availableBuckets.forEach((bucket) => {
                   const newFormat = {id: bucket.bucket_id, label: bucket.bucket_name}
                   newBucketFormat.push(newFormat)
                 })
                 updateBucketList(newBucketFormat);
-                updateClientList(newClientFormat)
+                updateClientList(newClientFormat);
+                updateOutBuckets(outBuckets);
             })
         }
         catch(error) {
@@ -92,20 +104,23 @@ function Transactions() {
                             label="Name"
                             options={clientList}
                             onChange={(selected) => {
-                                setSelectedClient(selected)
+                                setSelectedClient(selected);
+                                if(selected.length > 0) {
+                                    findBucketOwner(selected[0].id, outBuckets, setReturningBucket)
+                                }
+                               
                             }}
                         />
-                    
-                    <Form.Label>Returning Bucket</Form.Label>
-                        <Typeahead 
-                            id="buckets"
-                            label="Bucket"
-                            options={bucketList}
-                            onChange={(selected) => {
-                                setReturningBucket(selected)
-                            }}
-                        />
-                    <Form.Label>New Bucket</Form.Label>
+                    {returningBucket !== null ? 
+                        <div className="col mt-3 mb-5">
+                            <h4>Returning Bucket: {returningBucket.bucket_name}</h4>
+                            <Form.Label>Weight</Form.Label>
+                            <Form.Control size="lg" type="number" placeholder='Enter Weight' onChange={(e) => {setBucketWeight(e.target.value)}}  />   
+                             
+                        </div> :
+                    null}
+                    {(weight !== null && weight.length) ? 
+                    <div>                    <Form.Label>New Bucket</Form.Label>
                         <Typeahead 
                             id="buckets"
                             label="Bucket"
@@ -113,9 +128,10 @@ function Transactions() {
                             onChange={(selected) => {
                                 setNewBucket(selected)
                             }}
-                        />
-                        
-                    <Button onClick={ ()=> startSubmit()} className="m-2">Submit</Button>
+                        /> 
+                                       <Button onClick={ ()=> startSubmit()} className="m-2">Submit</Button>
+                        </div>: null}
+     
                 </Form.Group>
                 : null
             } 
