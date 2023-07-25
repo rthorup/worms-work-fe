@@ -11,7 +11,7 @@ async function getCurrentList(url) {
 }
 
 async function addTransaction(formData, url) {
-    const {selectedId, returningId, newBucketId, date}= formData;
+    const {selectedId, returningId, newBucketId, date, weight}= formData;
     const result = await fetch(`${url}/transactions`, {
         method: "POST",
         mode: "cors",
@@ -22,8 +22,8 @@ async function addTransaction(formData, url) {
             "client_id": selectedId,
             "return_bucket" :returningId,
             "new_bucket": newBucketId,
-            "date": date
-
+            "date": date,
+            "weight": weight
         })
     })
     const response = await result.json();

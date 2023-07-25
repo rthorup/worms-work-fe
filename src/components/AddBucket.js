@@ -38,15 +38,25 @@ function AddBucket() {
 
     return (
         <div className="text-center">
-            <h1 className="my-3">Add Bucket</h1>
-            <Form>
-                {error.length ? <h5 className="text-danger">{error}</h5>: null}
-                <Form.Group className="mb-3" controlId='bucketName'>  
-                    <Form.Label>Bucket Name</Form.Label>
-                    <Form.Control onChange={(e) => {updateBucketName(e.target.value)}} size="lg" type="input" placeholder='Bucket Name' />
-                </Form.Group>
-                <Button onClick={ ()=> startSubmit({bucketName})}className="m-2">Submit</Button>
-            </Form>
+            {
+                addSuccess ?
+                <div>
+                    <h2>Bucket successfully added!</h2>
+                </div>
+                :
+                <>
+                    <h1 className="my-3">Add Bucket</h1>
+                    <Form>
+                        {error.length ? <h5 className="text-danger">{error}</h5>: null}
+                        <Form.Group className="mb-3" controlId='bucketName'>  
+                            <Form.Label>Bucket Name</Form.Label>
+                            <Form.Control onChange={(e) => {updateBucketName(e.target.value)}} size="lg" type="input" placeholder='Bucket Name' />
+                        </Form.Group>
+                        <Button onClick={ ()=> startSubmit({bucketName})}className="m-2">Submit</Button>
+                    </Form>
+                </>
+            }
+
         </div>
     )
 }

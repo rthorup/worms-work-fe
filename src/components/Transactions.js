@@ -50,7 +50,8 @@ function Transactions() {
                 const selectedId = selectedClient[0].id;
                 const returningId = returningBucket.bucket_id;
                 const newBucketId = newBucket[0].id;
-                const result = await addTransaction({selectedId, returningId, newBucketId, date}, url)
+                const result = await addTransaction({selectedId, returningId, newBucketId, date, weight}, url)
+                console.log(result);
                 if(result.rowCount === 1) {
                     setSuccessMessage("You have successfully added this transaction");
                     setAddSuccess(true)
@@ -96,7 +97,7 @@ function Transactions() {
             <h1>Transactions</h1>
             {success? <h3 className="text-success">{successMessage}</h3>: null}
             {error ? <h3 className="text-danger">{errorMessage}</h3>: null}
-            {bucketList.length && clientList.length ? 
+            {bucketList.length && clientList.length && success === false ? 
                 <Form.Group>
                     <Form.Label>Client Name</Form.Label>
                         <Typeahead 
@@ -129,9 +130,8 @@ function Transactions() {
                                 setNewBucket(selected)
                             }}
                         /> 
-                                       <Button onClick={ ()=> startSubmit()} className="m-2">Submit</Button>
                         </div>: null}
-     
+                    <Button onClick={ ()=> startSubmit()} className="m-2">Submit</Button>
                 </Form.Group>
                 : null
             } 

@@ -1,5 +1,6 @@
 
 import { useContext, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -20,6 +21,7 @@ function AddClient() {
     const [location, updateLocation] = useState(""); 
     const [error, setError] = useState("");
     const [addSuccess, setAddSuccess] = useState(false)
+    const [newClientId, setClientId] = useState(null);
     
 
     async function startSubmit (formData) {
@@ -29,7 +31,8 @@ function AddClient() {
        
         const result =  await addClient(formData, url);
         if(result.status === "success") {
-            setAddSuccess(true)
+            setClientId(result.id);
+            setAddSuccess(true);
         }
         else {
             setError("Error adding new client. Please try again");
@@ -41,7 +44,12 @@ function AddClient() {
             <h1>Add Client</h1>
             {
             addSuccess === true ? 
-            <div>Congratulations! {firstName} {lastName} has been successully added. Now lets get them a bucket!</div>
+            <>
+                <div>Congratulations! {firstName} {lastName} has been successully added. Now lets get them a bucket!</div>
+                <Link to={`/assign-bucket/${newClientId}`}><buttton className="btn btn-primary">Assign Bucket</buttton></Link>
+            </>
+            
+
             : 
             <Form>
                 {error.length ? <h5 className="text-danger">{error}</h5>: null}

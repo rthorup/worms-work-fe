@@ -4,14 +4,14 @@ import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ErrorPage from './components/ErrorPage';
 import { UrlContext } from './context/urlContext';
-import { AddBucket, AddClient, Home, Transactions} from "./components/index";
+import { AddBucket, AddClient, AssignBucket, Home, Transactions} from "./components/index";
 import {createHashRouter, RouterProvider} from "react-router-dom"
 import reportWebVitals from './reportWebVitals';
 
 
 
-const url = "https://worms-work-be.onrender.com";
-// const url = "http://localhost:3003";
+// const url = "https://worms-work-be.onrender.com";
+const url = "http://localhost:3003";
 const router = createHashRouter([
   {
   path: "/",
@@ -21,6 +21,11 @@ const router = createHashRouter([
   {
     path: "/add-client", 
     element:<AddClient />,
+    errorElement: <ErrorPage />
+  },
+  {
+    path: "/assign-bucket/:id",
+    element: <AssignBucket />,
     errorElement: <ErrorPage />
   },
   {
